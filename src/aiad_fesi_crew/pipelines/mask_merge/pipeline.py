@@ -4,20 +4,19 @@ generated using Kedro 0.19.14
 """
 
 from kedro.pipeline import Pipeline, node, pipeline
-from .nodes import combine_images_and_masks
+from .nodes import apply_folder_masks
 
 def create_pipeline(**_):
     return pipeline([
         node(
-            combine_images_and_masks,
-            inputs=dict(
-                raw_images="raw_images",
-                leaf_masks="leaf_masks",
-                mode="params:mask_merge.mode",
-                background_color="params:mask_merge.background_color",
-                bbox_margin="params:mask_merge.bbox_margin",
-            ),
-            outputs=["combined_images", "bbox_index"],
-            name="combine_masks_with_images",
+            func=apply_folder_masks,
+            inputs=[
+                "params:mask_merge.input_folder",
+                "params:mask_merge.mask_folder",
+                "params:mask_merge.output_folder",
+                "params:mask_merge.valid_exts",
+            ],
+            outputs="mask_merge_summary",
+            name="apply_masks_to_dataset",
         ),
     ])

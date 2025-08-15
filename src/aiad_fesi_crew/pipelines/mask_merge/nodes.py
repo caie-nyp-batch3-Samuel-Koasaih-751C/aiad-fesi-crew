@@ -1,90 +1,72 @@
-from __future__ import annotations
-from typing import Dict, Tuple, Literal, Callable
+import os
 from pathlib import Path
-import numpy as np
-from PIL import Image
-import pandas as pd
+from typing import Iterable, Tuple, Dict
+import cv2
 
-Mode = Literal["foreground", "alpha", "crop"]
+def _is_image(name: str, exts: Iterable[str]) -> bool:
+    return any(name.lower().endswith(e.lower()) for e in exts)
 
-def _mask_bool(mask_img: Image.Image, size: Tuple[int, int]) -> np.ndarray:
-    m = mask_img.convert("L")
-    if m.size != size:
-        m = m.resize(size, Image.NEAREST)
-    return np.asarray(m) > 0  # WHITE=keep
+def apply_folder_masks(
+    input_folder: str,
+    mask_folder: str,
+    output_folder: str,
+    valid_exts: Tuple[str, ...] = (".jpg", ".jpeg", ".png"),
+) -> Dict[str, int]:
+    """
+    Apply grayscale masks (white=keep) to all images under input_folder,
+    matching files by name inside the same category subfolder. Writes to output_folder.
+    Returns summary stats for logging.
+    """
+    inp = Path(input_folder)
+    msk = Path(mask_folder)
+    out = Path(output_folder)
+    out.mkdir(parents=True, exist_ok=True)
 
-def _bbox(m: np.ndarray, margin: int = 0):
-    ys, xs = np.where(m)
-    if ys.size == 0:
-        return None
-    y0, y1 = int(ys.min()), int(ys.max())
-    x0, x1 = int(xs.min()), int(xs.max())
-    h, w = m.shape
-    return max(0, x0 - margin), max(0, y0 - margin), min(w - 1, x1 + margin), min(h - 1, y1 + margin)
+    processed = skipped_nonimg = missing_mask = resized = read_err = 0
 
-def _key_norm(p: str) -> str:
-    parts = Path(p).parts
-    return "/".join(parts[-2:]) if len(parts) >= 2 else parts[-1]
+    for category in sorted([p for p in inp.iterdir() if p.is_dir()]):
+        input_category_path = category
+        mask_category_path = msk / category.name
+        output_category_path = out / category.name
 
-def _materialize(partitions: Dict[str, object]) -> Dict[str, object]:
-    """Call lazy loaders returned by PartitionedDataSet."""
-    out: Dict[str, object] = {}
-    for k, v in partitions.items():
-        out[k] = v() if callable(v) else v
-    return out
+        if not mask_category_path.exists():
+            # Skip categories that don't exist in masks
+            continue
 
-def combine_images_and_masks(
-    raw_images: Dict[str, Callable[[], Image.Image] | Image.Image],
-    leaf_masks: Dict[str, Callable[[], Image.Image] | Image.Image],
-    mode: Mode = "foreground",
-    background_color: Tuple[int, int, int] = (0, 0, 0),
-    bbox_margin: int = 5,
-):
-    """Merge originals + masks (white=keep). Returns (combined_images, bbox_index)."""
+        output_category_path.mkdir(parents=True, exist_ok=True)
 
-    # 1) load partitions (values are callables → call them)
-    raw_loaded = _materialize(raw_images)
-    mask_loaded = _materialize(leaf_masks)
+        for file in sorted(os.listdir(input_category_path)):
+            if not _is_image(file, valid_exts):
+                skipped_nonimg += 1
+                continue
 
-    # 2) normalize keys so structures can differ
-    imgs  = {_key_norm(k): (v.convert("RGB") if isinstance(v, Image.Image) else Image.open(v).convert("RGB"))
-             for k, v in raw_loaded.items()}
-    masks = {_key_norm(k): (v if isinstance(v, Image.Image) else Image.open(v))
-             for k, v in mask_loaded.items()}
+            img_path = input_category_path / file
+            mask_path = mask_category_path / file
 
-    out: Dict[str, Image.Image] = {}
-    rows = []
+            if not mask_path.exists():
+                missing_mask += 1
+                continue
 
-    common = sorted(set(imgs) & set(masks))
-    missing = sorted(set(imgs) - set(masks))
+            image = cv2.imread(str(img_path))
+            mask  = cv2.imread(str(mask_path), cv2.IMREAD_GRAYSCALE)
 
-    for key in common:
-        img = imgs[key]
-        w, h = img.size
-        keep = _mask_bool(masks[key], (w, h))
-        box = _bbox(keep, bbox_margin)
+            if image is None or mask is None:
+                read_err += 1
+                continue
 
-        if mode == "alpha":
-            rgba = np.dstack([np.asarray(img), (keep * 255).astype(np.uint8)])
-            merged = Image.fromarray(rgba, mode="RGBA")
-        elif mode == "crop" and box:
-            x0, y0, x1, y1 = box
-            merged = img.crop((x0, y0, x1 + 1, y1 + 1))
-        else:
-            arr = np.asarray(img).copy()
-            arr[~keep] = np.array(background_color, dtype=arr.dtype)
-            merged = Image.fromarray(arr, mode="RGB")
+            if image.shape[:2] != mask.shape[:2]:
+                mask = cv2.resize(mask, (image.shape[1], image.shape[0]))
+                resized += 1
 
-        out[key] = merged
-        if box:
-            x0, y0, x1, y1 = box
-            rows.append({"filepath": key, "has_mask": True, "x_min": x0, "y_min": y0, "x_max": x1, "y_max": y1})
-        else:
-            rows.append({"filepath": key, "has_mask": False, "x_min": 0, "y_min": 0, "x_max": w - 1, "y_max": h - 1})
+            masked_image = cv2.bitwise_and(image, image, mask=mask)
+            cv2.imwrite(str(output_category_path / file), masked_image)
+            processed += 1
 
-    for key in missing:
-        w, h = imgs[key].size
-        rows.append({"filepath": key, "has_mask": False, "x_min": 0, "y_min": 0, "x_max": w - 1, "y_max": h - 1})
-
-    bbox_df = pd.DataFrame(rows).sort_values("filepath").reset_index(drop=True)
-    return out, bbox_df
+    return {
+        "processed": processed,
+        "missing_mask": missing_mask,
+        "skipped_nonimg": skipped_nonimg,
+        "resized_masks": resized,
+        "read_errors": read_err,
+        "output_dir": str(out),
+    }

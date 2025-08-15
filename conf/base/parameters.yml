@@ -6,7 +6,7 @@ intermediate_masks_path: "data/02_intermediate/maskingv5"
 
 
 mask_merge:
-  mode: foreground        # foreground | alpha | crop
-  background_color: [0, 0, 0]
-  bbox_margin: 5
-
+  input_folder: "data/01_raw/plantdisease/PlantVillage"   # original images
+  mask_folder: "data/02_intermediate/maskingv5"           # masks from your preprocessing
+  output_folder: "data/03_primary/processed_plantv"       # <-- final masked images
+  valid_exts: [".jpg", ".jpeg", ".png"]
