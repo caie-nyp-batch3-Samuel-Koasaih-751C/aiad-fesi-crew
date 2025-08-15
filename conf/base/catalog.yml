@@ -94,3 +94,4 @@ dummy_confusion_matrix:
   type: matplotlib.MatplotlibWriter
   filepath: data/08_reporting/dummy_confusion_matrix.png
   versioned: true
+
