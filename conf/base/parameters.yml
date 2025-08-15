@@ -1,5 +1,12 @@
 gdrive_file_id: "12Q0V4JzWf9o5L6szJmmvXaCGSGQ5hy8z"
 raw_data_dir: "data/01_raw/plantdisease"
 
-raw_images_path: "data/01_raw/plantdisease/PlantVillage" 
+raw_images_path: "data/01_raw/plantdisease" 
 intermediate_masks_path: "data/02_intermediate/maskingv5"
+
+
+mask_merge:
+  mode: foreground        # foreground | alpha | crop
+  background_color: [0, 0, 0]
+  bbox_margin: 5
+
