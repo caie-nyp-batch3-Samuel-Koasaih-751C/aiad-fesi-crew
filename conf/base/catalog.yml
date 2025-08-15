@@ -42,12 +42,14 @@
 raw_images:
   type: partitions.PartitionedDataset
   path: data/01_raw/plantdisease
+  filename_suffix: .jpg        # choose one; see note below
   dataset:
     type: kedro_datasets.pillow.ImageDataset 
 
 leaf_masks:
   type: partitions.PartitionedDataset
   path: data/02_intermediate/maskingv5
+  filename_suffix: .png
   dataset:
     type: kedro_datasets.pillow.ImageDataset 
 
@@ -60,3 +62,4 @@ combined_images:
 bbox_index:
   type: pandas.CSVDataset
   filepath: data/02_intermediate/bbox_index.csv
+
