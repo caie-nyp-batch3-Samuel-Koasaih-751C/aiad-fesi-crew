@@ -11,7 +11,12 @@ import matplotlib
 matplotlib.use("Agg")  # headless
 import matplotlib.pyplot as plt
 from sklearn.metrics import confusion_matrix, classification_report
-import tensorflow as tf
+import os, tensorflow as tf
+os.environ.setdefault("TF_XLA_FLAGS", "--tf_xla_auto_jit=0")
+os.environ.setdefault("TF_ENABLE_ONEDNN_OPTS", "0")
+tf.config.optimizer.set_jit(False)               # disable XLA JIT
+from tensorflow.keras import mixed_precision
+mixed_precision.set_global_policy("float32")     # avoid mixed-dtype surprises
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.models import Model
 from tensorflow.keras.layers import Input, Dense, Dropout, BatchNormalization, GlobalAveragePooling2D, Conv2D
@@ -137,16 +142,22 @@ def train_validate_test_one_node(
     channels = 3  # using RGB
 
     # ---- Strategy (single node uses MirroredStrategy if available)
-    strategy = tf.distribute.MirroredStrategy()
+    gpus = tf.config.list_physical_devices("GPU")
+    if len(gpus) > 1:
+        strategy = tf.distribute.MirroredStrategy()
+    else:
+        strategy = tf.distribute.get_strategy()
+
     with strategy.scope():
-        inp, feat = _build_backbone(backbone, image_size, channels)
+        inp, feat = _build_backbone(backbone, image_size, channels=3)
         out = Dense(n_classes, activation="softmax", name="root")(feat)
         model = Model(inp, out)
         model.compile(
             loss="categorical_crossentropy",
-            optimizer=Adam(learning_rate=learning_rate),
-            metrics=["accuracy"]
+            optimizer=tf.keras.optimizers.Adam(learning_rate=learning_rate),
+            metrics=["accuracy"],
         )
+
 
     # ---- Callbacks
     model_out = Path(out_model_path)
