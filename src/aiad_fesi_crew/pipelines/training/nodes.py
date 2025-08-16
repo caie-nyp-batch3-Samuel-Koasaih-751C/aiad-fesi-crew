@@ -11,12 +11,27 @@ import matplotlib
 matplotlib.use("Agg")  # headless
 import matplotlib.pyplot as plt
 from sklearn.metrics import confusion_matrix, classification_report
-import os, tensorflow as tf
+import os
 os.environ.setdefault("TF_XLA_FLAGS", "--tf_xla_auto_jit=0")
 os.environ.setdefault("TF_ENABLE_ONEDNN_OPTS", "0")
-tf.config.optimizer.set_jit(False)               # disable XLA JIT
+os.environ.setdefault("TF_CPP_MIN_LOG_LEVEL", "2")
+
+import tensorflow as tf
+tf.config.optimizer.set_jit(False)
+
+# Float32 everywhere
 from tensorflow.keras import mixed_precision
-mixed_precision.set_global_policy("float32")     # avoid mixed-dtype surprises
+mixed_precision.set_global_policy("float32")
+
+# Gentle memory behavior
+for gpu in tf.config.list_physical_devices("GPU"):
+    try:
+        tf.config.experimental.set_memory_growth(gpu, True)
+    except Exception:
+        pass
+
+
+
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.models import Model
 from tensorflow.keras.layers import Input, Dense, Dropout, BatchNormalization, GlobalAveragePooling2D, Conv2D
@@ -24,7 +39,9 @@ from tensorflow.keras.applications import DenseNet121, ResNet50, EfficientNetB0
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.callbacks import ModelCheckpoint, ReduceLROnPlateau, EarlyStopping
 import pickle
-
+# Strategy: only mirror if >1 GPU
+gpus = tf.config.list_physical_devices("GPU")
+strategy = tf.distribute.MirroredStrategy() if len(gpus) > 1 else tf.distribute.get_strategy()
 
 def _build_backbone(name: str, img_size: int, channels: int):
     """Return a Keras backbone (no top) + input layer."""
