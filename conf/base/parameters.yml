@@ -10,3 +10,42 @@ mask_merge:
   mask_folder: "data/02_intermediate/maskingv5"           # masks from your preprocessing
   output_folder: "data/03_primary/processed_plantv"       # <-- final masked images
   valid_exts: [".jpg", ".jpeg", ".png"]
+
+
+data_split:
+  src_root: "data/03_primary/processed_plantv"   # from mask_merge
+  dst_root: "data/05_model_input"                # <- target
+  train_ratio: 0.7
+  val_ratio: 0.15
+  seed: 42
+  limit_per_class: null        # e.g., 500 to cap per class during testing
+
+
+train:
+  data_root: "data/05_model_input"
+  image_size: 256
+  batch_size: 16
+  epochs: 3
+  backbone: "densenet121"     # options: densenet121, resnet50, efficientnetb0
+  learning_rate: 0.002
+  seed: 42
+
+  augment:
+    rotation_range: 360
+    width_shift_range: 0.2
+    height_shift_range: 0.2
+    zoom_range: 0.2
+    horizontal_flip: true
+    vertical_flip: true
+    shear_range: 0.0
+    brightness_range: null
+
+  # Outputs
+  out_model_path:   "data/06_models/model.h5"
+  out_history_path: "data/07_model_output/history.pkl"
+  out_history_plot: "data/07_model_output/history.png"
+  out_cm_plot:      "data/07_model_output/confusion_matrix.png"
+  out_report_path:  "data/07_model_output/classification_report.txt"
+
+
+

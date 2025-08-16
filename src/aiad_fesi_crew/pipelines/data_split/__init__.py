@@ -1,5 +1,5 @@
 """
-This is a boilerplate pipeline 'preprocessing'
+This is a boilerplate pipeline 'data_split'
 generated using Kedro 0.19.14
 """
 
