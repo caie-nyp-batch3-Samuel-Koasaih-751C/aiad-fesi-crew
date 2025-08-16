@@ -1,0 +1,23 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: mask-apply
+spec:
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: mask-apply
+        image: yourorg/plantml-kedro:latest
+        env:
+          - name: PIPELINE
+            value: "mask_merge"
+          - name: KEDRO_ENV
+            value: "base"
+        volumeMounts:
+          - name: data
+            mountPath: /project/data
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: plantml-data-pvc

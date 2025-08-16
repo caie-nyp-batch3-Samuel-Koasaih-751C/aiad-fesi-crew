@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: plantml-ui
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: plantml-ui }
+  template:
+    metadata:
+      labels: { app: plantml-ui }
+    spec:
+      containers:
+      - name: ui
+        image: yourorg/plantml-kedro:latest
+        env:
+          - name: PIPELINE
+            value: "ui"
+          - name: MODEL_PATH
+            value: "/project/data/06_models/model.h5"
+        ports:
+          - containerPort: 8000
+        readinessProbe:
+          httpGet: { path: /, port: 8000 }
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        livenessProbe:
+          httpGet: { path: /, port: 8000 }
+          initialDelaySeconds: 15
+          periodSeconds: 15
+        volumeMounts:
+          - name: data
+            mountPath: /project/data
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: plantml-data-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: plantml-ui-svc
+spec:
+  selector: { app: plantml-ui }
+  ports:
+    - port: 80
+      targetPort: 8000
+      protocol: TCP
+      name: http
+  type: ClusterIP

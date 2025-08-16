@@ -1,0 +1,32 @@
+FROM python:3.10-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1
+
+# system deps (opencv, etc.)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git build-essential ffmpeg libgl1 curl && \
+    rm -rf /var/lib/apt/lists/*
+
+WORKDIR /project
+
+# install python deps first for cache
+COPY requirements.txt ./requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt && \
+    pip install --no-cache-dir gunicorn
+
+# copy project code (no data)
+COPY pyproject.toml ./
+COPY src ./src
+COPY conf ./conf
+COPY docker/gunicorn.conf.py ./docker/gunicorn.conf.py
+COPY docker/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+# non-root user
+RUN useradd -ms /bin/bash appuser && chown -R appuser:appuser /project
+USER appuser
+
+# default: show kedro help (overridden by entrypoint)
+ENTRYPOINT ["/entrypoint.sh"]

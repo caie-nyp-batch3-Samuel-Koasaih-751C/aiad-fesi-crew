@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kedro-conf-map
+data:
+  # keep this small; big conf folders should use a PVC or bake into image
+  README: "Kedro conf mounted"

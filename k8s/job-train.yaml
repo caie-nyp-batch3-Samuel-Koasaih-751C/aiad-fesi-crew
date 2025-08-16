@@ -1,0 +1,30 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: train
+spec:
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: train
+        image: yourorg/plantml-train:latest
+        env:
+          - name: PIPELINE
+            value: "training"
+          - name: KEDRO_ENV
+            value: "base"
+          - name: TF_XLA_FLAGS
+            value: "--tf_xla_auto_jit=0"
+          - name: TF_ENABLE_ONEDNN_OPTS
+            value: "0"
+        resources:
+          limits:
+            nvidia.com/gpu: 1
+        volumeMounts:
+          - name: data
+            mountPath: /project/data
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: plantml-data-pvc
