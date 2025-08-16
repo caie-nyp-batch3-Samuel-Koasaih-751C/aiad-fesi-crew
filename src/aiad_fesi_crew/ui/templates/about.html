@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>About Us</title>
+    <link rel="stylesheet" href="{{ url_for('ui.static', filename='Styles.css') }}">
+
+  </head>
+  <body>
+    <nav class="navigation">
+      <div>
+        <img src="{{ url_for('static', filename='images/delogo.png') }}" alt="Logo" width="100px">
+      </div>
+      <div>
+        <a href="{{ url_for('home') }}">Home</a>
+        <a class="selected" href="{{ url_for('about') }}">About Us</a>
+        <a href="{{ url_for('modelpage') }}">Model</a>
+        <a class="last" href="{{ url_for('reviews') }}">Customer Reviews</a>
+      </div>
+    </nav>
+
+    <div class="container">
+      <header class="header">
+        <h1>About Us</h1>
+        <p>Learn more about who we are and what we do.</p>
+      </header>
+
+      <section>
+        <h2>Our Mission</h2>
+        <p>
+          At LeafSense, our mission is to empower individuals and organizations
+          to better care for their plants through innovative technology and
+          accessible tools. We believe in combining nature with technology to
+          create a sustainable future.
+        </p>
+
+        <h2>What We Offer</h2>
+        <p>
+          We provide advanced plant disease detection systems, leveraging the
+          latest in artificial intelligence and data science. Our tools are
+          designed to make plant care simple, efficient, and effective for both
+          beginners and experts.
+        </p>
+
+        <h2>Our Team</h2>
+        <p>
+          Our team is made up of passionate plant enthusiasts, tech innovators,
+          and dedicated professionals who work tirelessly to bring the best
+          solutions to our users. We are committed to quality, innovation, and
+          sustainability in everything we do.
+        </p>
+      </section>
+    </div>
+
+    <footer>&copy; 2025 LeafSense. All Rights Reserved.</footer>
+  </body>
+</html>

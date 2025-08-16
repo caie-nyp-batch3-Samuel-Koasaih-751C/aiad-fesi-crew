@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Customer Reviews</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='Styles.css') }}">
+
+
+  </head>
+  <body>
+    <nav class="navigation">
+      <div>
+        <img src="{{ url_for('static', filename='images/delogo.png') }}" alt="Logo" width="100px">
+      </div>
+      <div>
+        <a href="{{ url_for('home') }}">Home</a>
+        <a href="{{ url_for('about') }}">About Us</a>
+        <a href="{{ url_for('modelpage') }}">Model</a>
+        <a class="last selected" href="{{ url_for('reviews') }}">Customer Reviews</a>
+      </div>
+    </nav>
+
+    <div class="container">
+      <header class="header">
+        <h1>Customer Reviews</h1>
+        <p>See what our customers have to say about LeafSense!</p>
+      </header>
+
+      <section>
+        <div class="review">
+          <strong>John Doe</strong>
+          <p>
+            "LeafSense has completely changed how I care for my plants. The
+            disease detection tool is incredibly accurate and easy to use!"
+          </p>
+        </div>
+
+        <div class="review">
+          <strong>Jane Smith</strong>
+          <p>
+            "I love how user-friendly the LeafSense system is. My garden has
+            never been healthier! Highly recommend it to everyone."
+          </p>
+        </div>
+
+        <div class="review">
+          <strong>Emily Johnson</strong>
+          <p>
+            "The AI engine is a game-changer. Identifying and treating plant
+            diseases has never been this straightforward. Great job,
+            LeafSense!"
+          </p>
+        </div>
+      </section>
+    </div>
+
+    <footer>&copy; 2025 LeafSense. All Rights Reserved.</footer>
+  </body>
+</html>
