@@ -1,145 +1,70 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LeafSense Model</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LeafSense Home</title>
+    <!-- static lives on the app -> endpoint is 'static' -->
     <link rel="stylesheet" href="{{ url_for('static', filename='Styles.css') }}">
   </head>
   <body>
     <nav class="navigation">
       <div>
-        <img src="{{ url_for('static', filename='images/delogo.png') }}" alt="Logo" width="100px">
+        <img src="{{ url_for('static', filename='images/delogo.png') }}" alt="Logo" width="100">
       </div>
       <div>
-        <a href="{{ url_for('home') }}">Home</a>
-        <a href="{{ url_for('about') }}">About Us</a>
-        <a class="selected" href="{{ url_for('modelpage') }}">Model</a>
-        <a class="last" href="{{ url_for('reviews') }}">Customer Reviews</a>
+        <!-- blueprint endpoints -> prefix 'ui.' -->
+        <a class="{{ 'selected' if request.endpoint=='ui.home' else '' }}" href="{{ url_for('ui.home') }}">Home</a>
+        <a class="{{ 'selected' if request.endpoint=='ui.about' else '' }}" href="{{ url_for('ui.about') }}">About Us</a>
+        <a class="{{ 'selected' if request.endpoint=='ui.model_page' else '' }}" href="{{ url_for('ui.model_page') }}">Model</a>
+        <a class="last {{ 'selected' if request.endpoint=='ui.reviews' else '' }}" href="{{ url_for('ui.reviews') }}">Customer Reviews</a>
       </div>
     </nav>
 
     <div class="container">
       <header class="header">
-        <h1>Plant Disease Detection</h1>
-        <p>Upload an image and select a class to diagnose your plant's health.</p>
+        <h1>Welcome to LeafSense</h1>
+        <p>Your one-stop solution for all your plant care needs!</p>
+        <a href="{{ url_for('ui.model_page') }}" class="start-button">Get Started</a>
       </header>
 
-      <div class="content">
-        <form id="upload-form">
-          <label for="image-upload">Upload an Image:</label>
-          <input type="file" id="image-upload" class="image-upload" accept="image/*">
-          <div class="image-preview" id="image-preview">
-            <p>No image uploaded yet.</p>
-          </div>
-          <button type="button" id="predict-button">Predict</button>
-          <br><br>
-
-          <label for="classDropdown">Disease Prediction:</label>
-          <select id="classDropdown">
-            <option value="">Select Disease Class</option>
-            <option value="Pepper bell Bacterial spot">Pepper bell Bacterial spot</option>
-            <option value="Pepper bell healthy">Pepper bell healthy</option>
-            <option value="Potato Early blight">Potato Early blight</option>
-            <option value="Potato healthy">Potato healthy</option>
-            <option value="Potato Late blight">Potato Late blight</option>
-            <option value="Tomato Bacterial spot">Tomato Bacterial spot</option>
-            <option value="Tomato Early blight">Tomato Early blight</option>
-            <option value="Tomato healthy">Tomato healthy</option>
-            <option value="Tomato Late blight">Tomato Late blight</option>
-            <option value="Tomato Leaf Mold">Tomato Leaf Mold</option>
-            <option value="Tomato Septoria leaf spot">Tomato Septoria leaf spot</option>
-            <option value="Tomato Spider mites Two spotted spider mite">Tomato Spider mites Two spotted spider mite</option>
-            <option value="Tomato Target Spot">Tomato Target Spot</option>
-            <option value="Tomato mosaic virus">Tomato mosaic virus</option>
-            <option value="Tomato YellowLeaf Curl Virus">Tomato YellowLeaf Curl Virus</option>
-          </select>
-
-          <div class="advice" id="advice-box">
-            <p>Select your diagnosis for advice.</p>
-          </div>
-        </form>
+      <div class="carousel">
+        <div class="carousel-images" id="carousel-images">
+          <img src="{{ url_for('static', filename='images/img1.JPG') }}"  alt="Sample Image">
+          <img src="{{ url_for('static', filename='images/img2.JPG') }}"  alt="Sample Image">
+          <img src="{{ url_for('static', filename='images/img3.JPG') }}"  alt="Sample Image">
+          <img src="{{ url_for('static', filename='images/img4.JPG') }}"  alt="Sample Image">
+          <img src="{{ url_for('static', filename='images/img5.JPG') }}"  alt="Sample Image">
+          <img src="{{ url_for('static', filename='images/img6.JPG') }}"  alt="Sample Image">
+          <img src="{{ url_for('static', filename='images/img7.JPG') }}"  alt="Sample Image">
+          <img src="{{ url_for('static', filename='images/img8.JPG') }}"  alt="Sample Image">
+        </div>
       </div>
     </div>
 
     <footer>&copy; 2025 LeafSense. All Rights Reserved.</footer>
 
     <script>
-      const imageUpload = document.getElementById("image-upload");
-      const imagePreview = document.getElementById("image-preview");
-      const predictButton = document.getElementById("predict-button");
-      const classDropdown = document.getElementById("classDropdown");
-      const adviceBox = document.getElementById("advice-box");
-
-      imageUpload.addEventListener("change", function () {
-        const file = imageUpload.files[0];
-        if (file) {
-          const reader = new FileReader();
-          reader.onload = function (e) {
-            imagePreview.innerHTML = `<img src="${e.target.result}" alt="Uploaded Image" style="max-width: 300px; margin-top: 20px;">`;
-          };
-          reader.readAsDataURL(file);
+      const carouselImages = document.getElementById("carousel-images");
+      const totalImages = 8;
+      const imagesToShow = 4;
+      const imageWidth = 100 / imagesToShow;
+      let index = 0;
+      function moveCarousel() {
+        index++;
+        if (index > totalImages - imagesToShow) {
+          carouselImages.style.transition = "none";
+          carouselImages.style.transform = "translateX(0%)";
+          index = 1;
+          setTimeout(() => {
+            carouselImages.style.transition = "transform 1s ease-in-out";
+            carouselImages.style.transform = `translateX(-${index * imageWidth}%)`;
+          }, 50);
         } else {
-          imagePreview.innerHTML = "<p>No image uploaded yet.</p>";
+          carouselImages.style.transform = `translateX(-${index * imageWidth}%)`;
         }
-      });
-
-      predictButton.addEventListener("click", async function () {
-        const file = imageUpload.files[0];
-        if (!file) {
-          adviceBox.innerHTML = "<p>Please upload an image before predicting.</p>";
-          return;
-        }
-
-        const formData = new FormData();
-        formData.append("image", file);
-
-        try {
-          const response = await fetch("/predict", {
-            method: "POST",
-            body: formData,
-          });
-          const result = await response.json();
-          if (result.error) {
-            adviceBox.innerHTML = `<p>Error: ${result.error}</p>`;
-          } else {
-            classDropdown.value = result.prediction;
-            classDropdown.dispatchEvent(new Event("change"));
-          }
-        } catch (error) {
-          adviceBox.innerHTML = `<p>Error: ${error.message}</p>`;
-        }
-      });
-
-      classDropdown.addEventListener("change", function () {
-        const selectedClass = classDropdown.value;
-        let advice = "";
-
-        if (selectedClass.includes("healthy")) {
-          advice = "<strong>Congratulations!</strong> Your plant is healthy. Keep up the good work by providing adequate water, sunlight, and nutrients.";
-        } else if (selectedClass.includes("Bacterial spot")) {
-          advice = "Your plant has bacterial spot. Treat it by removing affected leaves and applying a copper-based fungicide.";
-        } else if (selectedClass.includes("Early blight")) {
-          advice = "Your plant is affected by early blight. Remove affected foliage and use a fungicide with chlorothalonil.";
-        } else if (selectedClass.includes("Late blight")) {
-          advice = "Your plant has late blight. Destroy infected plants and use a fungicide containing mancozeb.";
-        } else if (selectedClass.includes("Target Spot")) {
-          advice = "Your plant has target spot. Use a broad-spectrum fungicide and ensure good air circulation around plants.";
-        } else if (selectedClass.includes("mosaic virus")) {
-          advice = "Your plant has tomato mosaic virus. Remove infected plants and disinfect tools to prevent spread.";
-        } else if (selectedClass.includes("Curl")) {
-          advice = "Your plant has yellow leaf curl virus. Control whiteflies as they spread this virus, and remove infected plants.";
-        } else if (selectedClass.includes("Leaf Mold")) {
-          advice = "Your plant has leaf mold. Increase air circulation, reduce humidity, and apply a fungicide.";
-        } else if (selectedClass.includes("Septoria leaf spot")) {
-          advice = "Your plant has septoria leaf spot. Remove affected leaves and apply a fungicide containing chlorothalonil.";
-        } else if (selectedClass.includes("Spider mites")) {
-          advice = "Your plant has spider mites. Use insecticidal soap or neem oil to control the infestation.";
-        } else {
-          advice = "Please select your diagnosis of plant.";
-        }
-        adviceBox.innerHTML = `<p>${advice}</p>`;
-      });
+      }
+      setInterval(moveCarousel, 3000);
     </script>
   </body>
 </html>

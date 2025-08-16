@@ -4,20 +4,20 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>LeafSense Home</title>
+    <!-- static lives on the app -> endpoint is 'static' -->
     <link rel="stylesheet" href="{{ url_for('static', filename='Styles.css') }}">
-
-
   </head>
   <body>
     <nav class="navigation">
       <div>
-        <img src="{{ url_for('static', filename='images/delogo.png') }}" alt="Logo" width="100px">
+        <img src="{{ url_for('static', filename='images/delogo.png') }}" alt="Logo" width="100">
       </div>
       <div>
-        <a class="selected" href="{{ url_for('home') }}">Home</a>
-        <a href="{{ url_for('about') }}">About Us</a>
-        <a href="{{ url_for('modelpage') }}">Model</a>
-        <a class="last" href="{{ url_for('reviews') }}">Customer Reviews</a>
+        <!-- blueprint endpoints -> prefix 'ui.' -->
+        <a class="{{ 'selected' if request.endpoint=='ui.home' else '' }}" href="{{ url_for('ui.home') }}">Home</a>
+        <a class="{{ 'selected' if request.endpoint=='ui.about' else '' }}" href="{{ url_for('ui.about') }}">About Us</a>
+        <a class="{{ 'selected' if request.endpoint=='ui.model_page' else '' }}" href="{{ url_for('ui.model_page') }}">Model</a>
+        <a class="last {{ 'selected' if request.endpoint=='ui.reviews' else '' }}" href="{{ url_for('ui.reviews') }}">Customer Reviews</a>
       </div>
     </nav>
 
@@ -25,19 +25,19 @@
       <header class="header">
         <h1>Welcome to LeafSense</h1>
         <p>Your one-stop solution for all your plant care needs!</p>
-        <a href="{{ url_for('modelpage') }}" class="start-button">Get Started</a>
+        <a href="{{ url_for('ui.model_page') }}" class="start-button">Get Started</a>
       </header>
 
       <div class="carousel">
         <div class="carousel-images" id="carousel-images">
-          <img src="{{ url_for('static', filename='images/img1.JPG') }}" alt="Sample Image">
-          <img src="{{ url_for('static', filename='images/img2.JPG') }}" alt="Sample Image">
-          <img src="{{ url_for('static', filename='images/img3.JPG') }}" alt="Sample Image">
-          <img src="{{ url_for('static', filename='images/img4.JPG') }}" alt="Sample Image">
-          <img src="{{ url_for('static', filename='images/img5.JPG') }}" alt="Sample Image">
-          <img src="{{ url_for('static', filename='images/img6.JPG') }}" alt="Sample Image">
-          <img src="{{ url_for('static', filename='images/img7.JPG') }}" alt="Sample Image">
-          <img src="{{ url_for('static', filename='images/img8.JPG') }}" alt="Sample Image">
+          <img src="{{ url_for('static', filename='images/img1.JPG') }}"  alt="Sample Image">
+          <img src="{{ url_for('static', filename='images/img2.JPG') }}"  alt="Sample Image">
+          <img src="{{ url_for('static', filename='images/img3.JPG') }}"  alt="Sample Image">
+          <img src="{{ url_for('static', filename='images/img4.JPG') }}"  alt="Sample Image">
+          <img src="{{ url_for('static', filename='images/img5.JPG') }}"  alt="Sample Image">
+          <img src="{{ url_for('static', filename='images/img6.JPG') }}"  alt="Sample Image">
+          <img src="{{ url_for('static', filename='images/img7.JPG') }}"  alt="Sample Image">
+          <img src="{{ url_for('static', filename='images/img8.JPG') }}"  alt="Sample Image">
         </div>
       </div>
     </div>
@@ -47,31 +47,24 @@
     <script>
       const carouselImages = document.getElementById("carousel-images");
       const totalImages = 8;
-      const imagesToShow = 4; // Show 4 images at a time
-      const imageWidth = 100 / imagesToShow; // Width for each image
+      const imagesToShow = 4;
+      const imageWidth = 100 / imagesToShow;
       let index = 0;
-
       function moveCarousel() {
         index++;
         if (index > totalImages - imagesToShow) {
-          // Seamless reset to the start
-          carouselImages.style.transition = "none"; // Disable transition for reset
+          carouselImages.style.transition = "none";
           carouselImages.style.transform = "translateX(0%)";
-          index = 1; // Reset index
+          index = 1;
           setTimeout(() => {
-            carouselImages.style.transition = "transform 1s ease-in-out"; // Re-enable transition
-            carouselImages.style.transform = `translateX(-${
-              index * imageWidth
-            }%)`;
+            carouselImages.style.transition = "transform 1s ease-in-out";
+            carouselImages.style.transform = `translateX(-${index * imageWidth}%)`;
           }, 50);
         } else {
-          carouselImages.style.transform = `translateX(-${
-            index * imageWidth
-          }%)`;
+          carouselImages.style.transform = `translateX(-${index * imageWidth}%)`;
         }
       }
-
-      setInterval(moveCarousel, 3000); // Move every 3 seconds
+      setInterval(moveCarousel, 3000);
     </script>
   </body>
 </html>

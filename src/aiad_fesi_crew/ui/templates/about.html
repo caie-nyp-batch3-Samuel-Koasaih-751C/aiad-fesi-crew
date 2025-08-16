@@ -4,19 +4,24 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>About Us</title>
-    <link rel="stylesheet" href="{{ url_for('ui.static', filename='Styles.css') }}">
-
+    <!-- static is on the app, not the blueprint -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='Styles.css') }}">
   </head>
   <body>
     <nav class="navigation">
       <div>
-        <img src="{{ url_for('static', filename='images/delogo.png') }}" alt="Logo" width="100px">
+        <img src="{{ url_for('static', filename='images/delogo.png') }}" alt="Logo" width="100">
       </div>
       <div>
-        <a href="{{ url_for('home') }}">Home</a>
-        <a class="selected" href="{{ url_for('about') }}">About Us</a>
-        <a href="{{ url_for('modelpage') }}">Model</a>
-        <a class="last" href="{{ url_for('reviews') }}">Customer Reviews</a>
+        <!-- blueprint endpoints are namespaced with 'ui.' -->
+        <a class="{{ 'selected' if request.endpoint=='ui.home' else '' }}"
+           href="{{ url_for('ui.home') }}">Home</a>
+        <a class="{{ 'selected' if request.endpoint=='ui.about' else '' }}"
+           href="{{ url_for('ui.about') }}">About Us</a>
+        <a class="{{ 'selected' if request.endpoint=='ui.model_page' else '' }}"
+           href="{{ url_for('ui.model_page') }}">Model</a>
+        <a class="last {{ 'selected' if request.endpoint=='ui.reviews' else '' }}"
+           href="{{ url_for('ui.reviews') }}">Customer Reviews</a>
       </div>
     </nav>
 
