@@ -1,31 +1,24 @@
 FROM python:3.10-slim
 
-# system deps (opencv needs these at runtime even if you don't compile it here)
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    libglib2.0-0 libsm6 libxrender1 libxext6 && \
-    rm -rf /var/lib/apt/lists/*
-
 WORKDIR /app
 
-# copy project (so Flask can import your package) + UI
-COPY pyproject.toml requirements.txt ./
-RUN pip install --no-cache-dir -r requirements.txt
+# OS deps (tiny)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential ca-certificates curl && \
+    rm -rf /var/lib/apt/lists/*
 
-# your Kedro package code
+# Install only the UI deps (fast layer)
+COPY docker/requirements.ui.txt /tmp/requirements.txt
+RUN pip install --no-cache-dir -r /tmp/requirements.txt
+
+# App code
 COPY src /app/src
+ENV PYTHONPATH=/app/src
 
-# copy UI bits
-COPY src/aiad_fesi_crew/ui /app/src/aiad_fesi_crew/ui
-
-# gunicorn + entrypoint (you already have these in docker/)
-COPY docker/gunicorn.conf.py docker/entrypoint.sh /app/
-
-ENV PYTHONPATH=/app/src \
-    FLASK_ENV=production \
-    PORT=8000 \
-    HOST=0.0.0.0
+# Gunicorn config + entrypoint
+COPY docker/gunicorn.conf.py /app/gunicorn.conf.py
+COPY docker/entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
 
 EXPOSE 8000
-ENTRYPOINT ["/app/entrypoint.sh"]
-# entrypoint script should exec something like:
-# exec gunicorn -c /app/gunicorn.conf.py "aiad_fesi_crew.ui:create_app()"
+CMD ["/app/entrypoint.sh"]

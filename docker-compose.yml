@@ -1,7 +1,11 @@
-version: "3.9"
+# docker-compose.yml
+name: aiad-fesi-crew
+
 services:
   mask_apply:
-    build: { context: ., dockerfile: docker/Dockerfile.kedro }
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.kedro
     environment:
       PIPELINE: mask_merge
       KEDRO_ENV: base
@@ -11,41 +15,57 @@ services:
       - ./src:/project/src:ro
 
   split:
-    build: { context: ., dockerfile: docker/Dockerfile.kedro }
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.kedro
     environment:
       PIPELINE: data_split
       KEDRO_ENV: base
-    depends_on: [mask_apply]
+    depends_on:
+      - mask_apply
     volumes:
       - ./data:/project/data
       - ./conf:/project/conf:ro
       - ./src:/project/src:ro
 
   train:
-    build: { context: ., dockerfile: docker/Dockerfile.train }
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.train
     environment:
       PIPELINE: training
       KEDRO_ENV: base
+    # GPU (Compose v2 / Docker 20.10+)
     deploy:
       resources:
         reservations:
           devices:
-            - capabilities: [gpu]
-    runtime: --gpus=all   # for older Docker; on newer: use  on run
-    depends_on: [split]
+            - capabilities: ["gpu"]
+    devices:
+      - /dev/nvidiactl:/dev/nvidiactl
+      - /dev/nvidia0:/dev/nvidia0
+      - /dev/nvidia-uvm:/dev/nvidia-uvm
+      - /dev/nvidia-uvm-tools:/dev/nvidia-uvm-tools
+    depends_on:
+      - split
     volumes:
       - ./data:/project/data
       - ./conf:/project/conf:ro
       - ./src:/project/src:ro
 
   ui:
-    build: { context: ., dockerfile: docker/Dockerfile.kedro }
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.kedro
     environment:
       PIPELINE: ui
       MODEL_PATH: /project/data/06_models/model.h5
-    ports: ["8000:8000"]
-    depends_on: [train]
+    ports:
+      - "8000:8000"
+    depends_on:
+      - train
     volumes:
       - ./data:/project/data
       - ./conf:/project/conf:ro
       - ./src:/project/src:ro
+  

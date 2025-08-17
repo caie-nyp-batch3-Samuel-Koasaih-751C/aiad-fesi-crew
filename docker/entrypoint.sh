@@ -1,19 +1,19 @@
-#!/bin/sh
-set -e
+#!/usr/bin/env bash
+set -euo pipefail
 
-# Ensure src layout is visible even if editable install didn’t pick up
-export PYTHONPATH="${PYTHONPATH}:/project/src"
+# Make sure src is importable inside the image
+export PYTHONPATH="${PYTHONPATH:-}:/app/src"
+
+# default to UI if PIPELINE is unset/empty
+PIPELINE="${PIPELINE:-ui}"
 
 case "${PIPELINE}" in
   ui|UI)
-    # If your factory lives in aiad_fesi_crew/ui/routes.py:
-    exec gunicorn -c /docker/gunicorn.conf.py aiad_fesi_crew.ui.routes:create_app
+    # Factory lives in aiad_fesi_crew/ui/__init__.py
+    exec gunicorn -c /app/gunicorn.conf.py 'aiad_fesi_crew.ui:create_app'
     ;;
-  "" )
-    echo "PIPELINE env var is empty. Set PIPELINE=ui or a Kedro pipeline name." >&2
-    exit 1
-    ;;
-  * )
+  *)
+    echo "Running Kedro pipeline: ${PIPELINE}"
     exec kedro run --pipeline "${PIPELINE}"
     ;;
 esac
