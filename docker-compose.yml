@@ -31,7 +31,7 @@ services:
         reservations:
           devices:
             - capabilities: [gpu]
-    runtime: nvidia   # for older Docker; on newer: use --gpus=all on run
+    runtime: --gpus=all   # for older Docker; on newer: use  on run
     depends_on: [split]
     volumes:
       - ./data:/project/data

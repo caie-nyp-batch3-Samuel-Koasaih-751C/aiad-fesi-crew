@@ -1,14 +1,19 @@
-#!/usr/bin/env bash
+#!/bin/sh
 set -e
 
-# Which Kedro pipeline to run (for batch), or special "ui" to run Flask
-PIPELINE="${PIPELINE:-__default__}"
-ENV_NAME="${KEDRO_ENV:-base}"
+# Ensure src layout is visible even if editable install didn’t pick up
+export PYTHONPATH="${PYTHONPATH}:/project/src"
 
-if [ "$PIPELINE" = "ui" ]; then
-  echo ">>> Starting Flask UI via Gunicorn..."
-  exec gunicorn "aiad_fesi_crew.ui:create_app()" -c docker/gunicorn.conf.py
-else
-  echo ">>> Running Kedro pipeline: $PIPELINE (env: $ENV_NAME)"
-  exec kedro run --pipeline "$PIPELINE" -e "$ENV_NAME"
-fi
+case "${PIPELINE}" in
+  ui|UI)
+    # If your factory lives in aiad_fesi_crew/ui/routes.py:
+    exec gunicorn -c /docker/gunicorn.conf.py aiad_fesi_crew.ui.routes:create_app
+    ;;
+  "" )
+    echo "PIPELINE env var is empty. Set PIPELINE=ui or a Kedro pipeline name." >&2
+    exit 1
+    ;;
+  * )
+    exec kedro run --pipeline "${PIPELINE}"
+    ;;
+esac

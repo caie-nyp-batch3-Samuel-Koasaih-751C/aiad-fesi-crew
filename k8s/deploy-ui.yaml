@@ -12,25 +12,26 @@ spec:
     spec:
       containers:
       - name: ui
-        image: yourorg/plantml-kedro:latest
+        image: plantml-kedro:local     # matches your local image tag
+        imagePullPolicy: Never         # IMPORTANT for local images
         env:
           - name: PIPELINE
             value: "ui"
           - name: MODEL_PATH
-            value: "/project/data/06_models/model.h5"
+            value: "/project/data/06_models/model.h5"   # absolute path
         ports:
           - containerPort: 8000
         readinessProbe:
-          httpGet: { path: /, port: 8000 }
+          httpGet: { path: "/", port: 8000 }
           initialDelaySeconds: 5
           periodSeconds: 5
         livenessProbe:
-          httpGet: { path: /, port: 8000 }
+          httpGet: { path: "/", port: 8000 }
           initialDelaySeconds: 15
           periodSeconds: 15
         volumeMounts:
           - name: data
-            mountPath: /project/data
+            mountPath: /project/data   # mount where the app expects it
       volumes:
         - name: data
           persistentVolumeClaim:
@@ -41,10 +42,10 @@ kind: Service
 metadata:
   name: plantml-ui-svc
 spec:
+  type: NodePort
   selector: { app: plantml-ui }
   ports:
-    - port: 80
+    - name: http
+      port: 80
       targetPort: 8000
-      protocol: TCP
-      name: http
-  type: ClusterIP
+      nodePort: 30080

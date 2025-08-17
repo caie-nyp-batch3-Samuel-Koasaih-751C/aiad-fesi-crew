@@ -1,12 +1,10 @@
+# keep code/config – ignore heavy/volatile stuff
+data/**
 .git
+.venv
 __pycache__/
 *.pyc
-*.pyo
-*.pyd
-*.log
-.venv
-.env
-data/
-conf/local/
-dist/
-build/
+.pytest_cache/
+.mypy_cache/
+.DS_Store
+.viz/

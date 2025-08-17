@@ -1,32 +1,29 @@
+# docker/Dockerfile.kedro
 FROM python:3.10-slim
 
-ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1 \
-    PIP_DISABLE_PIP_VERSION_CHECK=1
-
-# system deps (opencv, etc.)
+# System deps you need (optional)
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    git build-essential ffmpeg libgl1 curl && \
-    rm -rf /var/lib/apt/lists/*
+    build-essential && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /project
 
-# install python deps first for cache
+# 1) install python deps first (better cache)
 COPY requirements.txt ./requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt && \
-    pip install --no-cache-dir gunicorn
+RUN pip install --no-cache-dir -r requirements.txt
 
-# copy project code (no data)
-COPY pyproject.toml ./
+# 2) copy project metadata and source
+COPY pyproject.toml ./pyproject.toml
 COPY src ./src
-COPY conf ./conf
-COPY docker/gunicorn.conf.py ./docker/gunicorn.conf.py
+
+# 3) install the kedro package itself (editable)
+RUN pip install --no-cache-dir -e .
+
+# 4) make sure src layout is on path for anything that imports without install
+ENV PYTHONPATH=/project/src
+
+# 5) runtime bits
+COPY docker/gunicorn.conf.py /docker/gunicorn.conf.py
 COPY docker/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
-# non-root user
-RUN useradd -ms /bin/bash appuser && chown -R appuser:appuser /project
-USER appuser
-
-# default: show kedro help (overridden by entrypoint)
 ENTRYPOINT ["/entrypoint.sh"]

@@ -1,23 +1,28 @@
-FROM tensorflow/tensorflow:2.17.0-gpu
+FROM python:3.10-slim
 
-ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1 \
-    TF_XLA_FLAGS=--tf_xla_auto_jit=0 \
-    TF_ENABLE_ONEDNN_OPTS=0 \
-    TF_CPP_MIN_LOG_LEVEL=2
+ENV PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1 \
+    KEDRO_DISABLE_TELEMETRY=1
+
+# System deps for numpy/scipy/opencv etc.
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential gcc \
+    libgl1 libglib2.0-0 \
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /project
-RUN apt-get update && apt-get install -y --no-install-recommends git ffmpeg libgl1 && rm -rf /var/lib/apt/lists/*
 
+# 1) Install Python deps early (cache-friendly)
 COPY requirements.txt ./requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY pyproject.toml ./
+# 2) Copy code and config
 COPY src ./src
 COPY conf ./conf
-COPY docker/entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+COPY pyproject.toml ./pyproject.toml
 
-ENV TF_FORCE_GPU_ALLOW_GROWTH=true
+# 3) Add an entrypoint to choose what to run
+COPY docker/entrypoint.train.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
