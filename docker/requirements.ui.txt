@@ -4,7 +4,7 @@ h5py>=3.10                    # Keras H5 loader
 opencv-python-headless>=4.9   # no X11
 Pillow>=10
 numpy>=1.26
-werkzeug>=3.0                     # if your app pins older Flask/Werkzeug APIs
-Flask==3.0.3
+Flask==2.3.3
+Werkzeug<3
 gunicorn>=21.2
 # if your UI imports Kedro or other libs, add them here too

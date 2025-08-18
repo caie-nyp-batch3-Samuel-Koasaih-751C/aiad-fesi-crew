@@ -1,5 +1,6 @@
 # keep code/config – ignore heavy/volatile stuff
 data/**
+!data/06_models/model.h5
 .git
 .venv
 __pycache__/
