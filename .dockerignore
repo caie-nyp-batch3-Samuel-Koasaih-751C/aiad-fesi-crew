@@ -1,6 +1,12 @@
-# keep code/config – ignore heavy/volatile stuff
+# ignore all of data by default
 data/**
+
+# BUT keep the model and its parent dirs
+!data
+!data/06_models
 !data/06_models/model.h5
+
+# the rest of your ignores
 .git
 .venv
 __pycache__/
