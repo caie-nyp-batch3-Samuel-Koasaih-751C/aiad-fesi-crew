@@ -1,23 +1,28 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: mask-apply
+  name: job-mask-apply
 spec:
+  backoffLimit: 0
   template:
+    metadata:
+      labels:
+        app: mask-apply
     spec:
       restartPolicy: Never
       containers:
-      - name: mask-apply
-        image: yourorg/plantml-kedro:latest
-        env:
-          - name: PIPELINE
-            value: "mask_merge"
-          - name: KEDRO_ENV
-            value: "base"
-        volumeMounts:
-          - name: data
-            mountPath: /project/data
+        - name: mask-apply
+          image: aiad-fesi-crew-kedro:v5   # <-- use your latest rebuilt image
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: PIPELINE
+              value: "mask_merge"          # <-- Kedro pipeline name
+            - name: KEDRO_ENV
+              value: "base"
+          volumeMounts:
+            - name: data
+              mountPath: /project/data     # persistent data volume
       volumes:
         - name: data
           persistentVolumeClaim:
-            claimName: plantml-data-pvc
+            claimName: plantml-data-pvc    # must already exist

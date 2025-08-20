@@ -1,9 +1,9 @@
-# docker/Dockerfile.kedro
 FROM python:3.10-slim
 
-# System deps you need (optional)
+# System deps
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential && rm -rf /var/lib/apt/lists/*
+    build-essential curl unzip && \
+    rm -rf /var/lib/apt/lists/*
 
 WORKDIR /project
 
@@ -14,11 +14,12 @@ RUN pip install --no-cache-dir -r requirements.txt
 # 2) copy project metadata and source
 COPY pyproject.toml ./pyproject.toml
 COPY src ./src
-
+COPY conf ./conf      
+COPY conf /project/conf
 # 3) install the kedro package itself (editable)
 RUN pip install --no-cache-dir -e .
 
-# 4) make sure src layout is on path for anything that imports without install
+# 4) make sure src layout is on path
 ENV PYTHONPATH=/project/src
 
 # 5) runtime bits

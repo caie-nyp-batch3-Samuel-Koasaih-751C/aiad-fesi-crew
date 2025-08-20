@@ -1,15 +1,22 @@
 gdrive_file_id: "12Q0V4JzWf9o5L6szJmmvXaCGSGQ5hy8z"
 raw_data_dir: "data/01_raw/plantdisease"
 
+params:gdrive_file_id: "12Q0V4JzWf9o5L6szJmmvXaCGSGQ5hy8z"
+params:raw_data_dir: "data/01_raw/plantdisease"
+
 raw_images_path: "data/01_raw/plantdisease" 
 intermediate_masks_path: "data/02_intermediate/maskingv5"
-
 
 mask_merge:
   input_folder: "data/01_raw/plantdisease/PlantVillage"   # original images
   mask_folder: "data/02_intermediate/maskingv5"           # masks from your preprocessing
   output_folder: "data/03_primary/processed_plantv"       # <-- final masked images
   valid_exts: [".jpg", ".jpeg", ".png"]
+
+params:mask_merge.valid_exts: "data/01_raw/plantdisease/PlantVillage" 
+params:mask_merge.input_folder: "data/02_intermediate/maskingv5"
+params:mask_merge.mask_folder: "data/03_primary/processed_plantv"
+params:mask_merge.output_folder: [".jpg", ".jpeg", ".png"]
 
 
 data_split:

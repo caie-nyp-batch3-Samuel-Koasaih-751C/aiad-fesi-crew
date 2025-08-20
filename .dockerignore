@@ -1,6 +1,3 @@
-# ignore all of data by default
-data/**
-
 # BUT keep the model and its parent dirs
 !data
 !data/06_models

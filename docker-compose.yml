@@ -1,6 +1,30 @@
 name: aiad-fesi-crew
 
 services:
+
+  ingestion:
+    build: { context: ., dockerfile: docker/Dockerfile.kedro }
+    image: aiad-fesi-crew-kedro:v1
+    environment:
+      PIPELINE: data_ingestion
+      KEDRO_ENV: base
+    volumes:
+      - ./data:/project/data
+      - ./conf:/project/conf:ro
+      - ./src:/project/src:ro
+    restart: "no"
+  data_preprocessing:
+    build: { context: ., dockerfile: docker/Dockerfile.kedro }
+    environment:
+      PIPELINE: data_preprocessing   # <-- pipeline name in Kedro
+      KEDRO_ENV: base
+    depends_on:
+      - split        # or mask_apply, depending on which step comes before
+    volumes:
+      - ./data:/project/data
+      - ./conf:/project/conf:ro
+      - ./src:/project/src:ro
+
   mask_apply:
     build: { context: ., dockerfile: docker/Dockerfile.kedro }
     environment:

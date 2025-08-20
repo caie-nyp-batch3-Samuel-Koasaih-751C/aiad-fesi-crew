@@ -1,28 +1,28 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: job-train
+  name: job-data-preprocessing
 spec:
   backoffLimit: 0
   template:
     metadata:
       labels:
-        app: train
+        app: data-preprocessing
     spec:
       restartPolicy: Never
       containers:
-        - name: train
-          image: aiad-fesi-crew-kedro:v5   # <-- latest image with conf included
+        - name: data-preprocessing
+          image: aiad-fesi-crew-kedro:v5   # <-- same Kedro image with conf baked in
           imagePullPolicy: IfNotPresent
           env:
             - name: PIPELINE
-              value: "training"
+              value: "data_preprocessing"   # <-- your Kedro pipeline name
             - name: KEDRO_ENV
               value: "base"
           volumeMounts:
             - name: data
-              mountPath: /project/data     # mount your PVC data here
+              mountPath: /project/data
       volumes:
         - name: data
           persistentVolumeClaim:
-            claimName: plantml-data-pvc    # same PVC used before
+            claimName: plantml-data-pvc

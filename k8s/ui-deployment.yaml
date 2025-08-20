@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: ui
-          image: aiad-fesi-crew-ui:latest
+          image: aiad-fesi-crew-ui:v3     # <-- use your built/tagged image
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8000
@@ -23,12 +23,30 @@ spec:
               value: "ui"
             - name: MODEL_PATH
               value: "/app/model/model.h5"
-          # (optional but recommended)
+          command: ["/bin/sh", "-c"]       # override CMD so Gunicorn knows what to run
+          args: ["/app/entrypoint.sh"]
+
+          # --- CPU & Memory resources ---
+          resources:
+            requests:
+              cpu: 100m        # reserve 0.1 core
+              memory: 256Mi    # reserve 256 MB
+            limits:
+              cpu: 500m        # cap at 0.5 core
+              memory: 512Mi    # cap at 512 MB
+
+          # health checks (for self-healing)
           readinessProbe:
-            httpGet: { path: /healthz, port: 8000 }
+            httpGet:
+              path: /healthz       # <-- adjust to your app route
+              port: 8000
             initialDelaySeconds: 5
             periodSeconds: 5
           livenessProbe:
-            httpGet: { path: /healthz, port: 8000 }
+            httpGet:
+              path: /healthz
+              port: 8000
             initialDelaySeconds: 10
             periodSeconds: 10
+
+      restartPolicy: Always

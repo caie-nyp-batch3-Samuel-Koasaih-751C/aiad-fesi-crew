@@ -1,28 +1,31 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: job-train
+  name: job-split
 spec:
   backoffLimit: 0
   template:
     metadata:
       labels:
-        app: train
+        app: split
     spec:
       restartPolicy: Never
       containers:
-        - name: train
-          image: aiad-fesi-crew-kedro:v5   # <-- latest image with conf included
+        - name: split
+          image: aiad-fesi-crew-kedro:v5   # <-- image with conf baked in
           imagePullPolicy: IfNotPresent
+          command: ["sh", "-c"]
+          args:
+            - kedro run --pipeline=data_split --env=base && sleep 600
           env:
             - name: PIPELINE
-              value: "training"
+              value: "data_split"
             - name: KEDRO_ENV
               value: "base"
           volumeMounts:
             - name: data
-              mountPath: /project/data     # mount your PVC data here
+              mountPath: /project/data     # persistent data volume
       volumes:
         - name: data
           persistentVolumeClaim:
-            claimName: plantml-data-pvc    # same PVC used before
+            claimName: plantml-data-pvc    # must already exist

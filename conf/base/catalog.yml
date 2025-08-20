@@ -63,3 +63,24 @@ bbox_index:
   type: pandas.CSVDataset
   filepath: data/02_intermediate/bbox_index.csv
 
+
+data_split_train:
+  type: partitions.PartitionedDataset
+  dataset: kedro_datasets.pillow.ImageDataset 
+  path: data/05_model_input/train
+  filename_suffix: .jpg
+  overwrite: true
+
+data_split_val:
+  type: partitions.PartitionedDataset
+  dataset: kedro_datasets.pillow.ImageDataset 
+  path: data/05_model_input/val
+  filename_suffix: .jpg
+  overwrite: true
+
+data_split_test:
+  type: partitions.PartitionedDataset
+  dataset: kedro_datasets.pillow.ImageDataset 
+  path: data/05_model_input/test
+  filename_suffix: .jpg
+  overwrite: true

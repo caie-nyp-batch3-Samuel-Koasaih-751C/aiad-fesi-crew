@@ -5,7 +5,8 @@ PIPELINE="${PIPELINE:-ui}"
 
 case "$PIPELINE" in
   ui|UI)
-    exec gunicorn -c /app/gunicorn.conf.py
+    # Explicitly tell Gunicorn where the Flask app factory is
+    exec gunicorn -c /app/gunicorn.conf.py "aiad_fesi_crew.ui:create_app()"
     ;;
   *)
     echo "Running Kedro pipeline: $PIPELINE"
