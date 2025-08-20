@@ -3,7 +3,6 @@
 This project implements a full machine learning workflow using **Kedro**, **Docker**, and **Kubernetes** with a Flask UI for inference.  
 It covers data ingestion, preprocessing, masking, dataset splitting, model training, and a production-ready UI served via Gunicorn behind Kubernetes with autoscaling.
 
----
 
 ## Project Structure
 
@@ -50,13 +49,11 @@ aiad-fesi-crew/
 └── README.md # You are here
 
 
----
-
 ## Running Kedro Pipelines Locally
 
 1. Install dependencies:
 
-```bash
+
 pip install -r requirements.txt
 
     Run a pipeline:
