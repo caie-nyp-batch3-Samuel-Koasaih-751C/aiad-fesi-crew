@@ -7,13 +7,12 @@ It covers data ingestion, preprocessing, masking, dataset splitting, model train
 
 1. Install dependencies:
 
+    pip install -r requirements.txt
 
-pip install -r requirements.txt
+Run a pipeline:
 
-    Run a pipeline:
-
-kedro run --pipeline data_split
-kedro run --pipeline training
+    kedro run --pipeline data_split
+    kedro run --pipeline training
 
 Pipelines available:
 
@@ -30,18 +29,18 @@ Pipelines available:
 Running with Docker
 Build Images
 
-# Kedro worker image
-docker build -f docker/Dockerfile.kedro -t aiad-fesi-crew-kedro:v5 .
+    # Kedro worker image
+    docker build -f docker/Dockerfile.kedro -t aiad-fesi-crew-kedro:v5 .
 
-# Training image
-docker build -f docker/Dockerfile.train -t aiad-fesi-crew-train:v3 .
+    # Training image    
+    docker build -f docker/Dockerfile.train -t aiad-fesi-crew-train:v3 .
 
-# UI image
-docker build -f docker/Dockerfile.ui -t aiad-fesi-crew-ui:v3 .
+    # UI image
+    docker build -f docker/Dockerfile.ui -t aiad-fesi-crew-ui:v3 .
 
 Run UI Locally
 
-docker run --rm -p 8000:8000 aiad-fesi-crew-ui:v3
+    docker run --rm -p 8000:8000 aiad-fesi-crew-ui:v3
 
 Then open http://localhost:8000
 
@@ -49,42 +48,42 @@ Then open http://localhost:8000
 Running on Kubernetes (Minikube)
 Start Minikube
 
-minikube start
+    minikube start
 
 Deploy Data PVC
 
-kubectl apply -f k8s/pvc-data.yaml
+    kubectl apply -f k8s/pvc-data.yaml
 
 Run Data/Training Jobs
 
-kubectl apply -f k8s/job-ingestion.yaml
-kubectl apply -f k8s/job-data-preprocessing.yaml
-kubectl apply -f k8s/job-mask-apply.yaml
-kubectl apply -f k8s/job-split.yaml
-kubectl apply -f k8s/job-train.yaml
+    kubectl apply -f k8s/job-ingestion.yaml
+    kubectl apply -f k8s/job-data-preprocessing.yaml
+    kubectl apply -f k8s/job-mask-apply.yaml
+    kubectl apply -f k8s/job-split.yaml
+    kubectl apply -f k8s/job-train.yaml
 
 Deploy UI
 
-kubectl apply -f k8s/deploy-ui.yaml
-kubectl apply -f k8s/ui-service.yaml
+    kubectl apply -f k8s/deploy-ui.yaml
+    kubectl apply -f k8s/ui-service.yaml
 
 (Optional) Horizontal Pod Autoscaler
 
-kubectl apply -f k8s/ui-hpa.yaml
+    kubectl apply -f k8s/ui-hpa.yaml
 
 Ingress Access
 
-    Enable ingress:
+Enable ingress:
 
-minikube addons enable ingress
+    minikube addons enable ingress
 
 Apply ingress:
 
-kubectl apply -f k8s/ui-ingress.yaml
+    kubectl apply -f k8s/ui-ingress.yaml
 
-Update /etc/hosts:
+    Update /etc/hosts:
 
-192.168.49.2   ui.potatoe
+    192.168.49.2   ui.potatoe
 
 (replace with your minikube ip)
 
@@ -93,15 +92,15 @@ Open http://ui.potatoe
 
 To simulate load and test scaling:
 
-# Install hey (Arch)
-sudo pacman -S hey
+    # Install hey (Arch)
+    sudo pacman -S hey
 
-# Run load test
-hey -z 30s -c 50 http://ui.potatoe/
+    # Run load test
+    hey -z 30s -c 50 http://ui.potatoe/
 
 Monitor scaling:
 
-kubectl get hpa -w
+    kubectl get hpa -w
 
 Features Implemented
 
@@ -123,29 +122,28 @@ Features Implemented
 
 Demo Script (Quick Run)
 
-# 1. Start cluster
-minikube start
+    # 1. Start cluster
+    minikube start
 
-# 2. Deploy PVC
-kubectl apply -f k8s/pvc-data.yaml
+    # 2. Deploy PVC
+    kubectl apply -f k8s/pvc-data.yaml
 
-# 3. Run preprocessing + training
-kubectl apply -f k8s/job-ingestion.yaml
-kubectl apply -f k8s/job-data-preprocessing.yaml
-kubectl apply -f k8s/job-mask-apply.yaml
-kubectl apply -f k8s/job-split.yaml
-kubectl apply -f k8s/job-train.yaml
+    # 3. Run preprocessing + training
+    kubectl apply -f k8s/job-ingestion.yaml
+    kubectl apply -f k8s/job-data-preprocessing.yaml
+    kubectl apply -f k8s/job-mask-apply.yaml
+    kubectl apply -f k8s/job-split.yaml
+    kubectl apply -f k8s/job-train.yaml
 
-# 4. Deploy UI
-kubectl apply -f k8s/deploy-ui.yaml
-kubectl apply -f k8s/ui-service.yaml
-kubectl apply -f k8s/ui-ingress.yaml
-kubectl apply -f k8s/ui-hpa.yaml
+    # 4. Deploy UI
+    kubectl apply -f k8s/deploy-ui.yaml
+    kubectl apply -f k8s/ui-service.yaml
+    kubectl apply -f k8s/ui-ingress.yaml
+    kubectl apply -f k8s/ui-hpa.yaml
 
-# 5. Access UI
-minikube ip   # check cluster IP
-# add to /etc/hosts
-# <IP>   ui.potatoe
-
+    # 5. Access UI
+    minikube ip   # check cluster IP
+    # add to /etc/hosts
+    # <IP>   ui.potatoe
 👨‍💻 Authors: AIAD FESI Crew
 📅 Version: August 2025
