@@ -9,9 +9,11 @@ import aiad_fesi_crew.pipelines.training as training
 
 def register_pipelines() -> dict[str, Pipeline]:
     return {
-        "__default__": data_ingestion.create_pipeline()
-                       + data_preprocessing.create_pipeline()
-                       + mask_merge.create_pipeline(),
+        "__default__":    data_ingestion.create_pipeline()
+                        + data_preprocessing.create_pipeline()
+                        + mask_merge.create_pipeline()
+                        + data_split.create_pipeline()
+                        + training.create_pipeline(),
         "data_ingestion": data_ingestion.create_pipeline(),
         "data_preprocessing": data_preprocessing.create_pipeline(),
         "mask_merge": mask_merge.create_pipeline(),
