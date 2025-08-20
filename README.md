@@ -3,52 +3,6 @@
 This project implements a full machine learning workflow using **Kedro**, **Docker**, and **Kubernetes** with a Flask UI for inference.  
 It covers data ingestion, preprocessing, masking, dataset splitting, model training, and a production-ready UI served via Gunicorn behind Kubernetes with autoscaling.
 
-
-## Project Structure
-
-aiad-fesi-crew/
-├── conf/ # Kedro configs (catalog, parameters, etc.)
-├── data/ # Local data (ignored in Docker/K8s)
-├── docker/ # Dockerfiles and entrypoints
-│ ├── Dockerfile.kedro
-│ ├── Dockerfile.train
-│ ├── Dockerfile.ui
-│ ├── entrypoint.sh
-│ ├── entrypoint.train.sh
-│ ├── gunicorn.conf.py
-│ └── requirements.ui.txt
-├── k8s/ # Kubernetes manifests
-│ ├── cm-kedro-conf.yaml
-│ ├── job-ingestion.yaml
-│ ├── job-data-preprocessing.yaml
-│ ├── job-mask-apply.yaml
-│ ├── job-split.yaml
-│ ├── job-train.yaml
-│ ├── pvc-data.yaml
-│ ├── deploy-ui.yaml
-│ ├── ui-service.yaml
-│ ├── ui-hpa.yaml
-│ └── ui-ingress.yaml
-├── notebooks/ # Jupyter notebooks (EDA, prototyping)
-├── src/aiad_fesi_crew/ # Main Kedro + UI source
-│ ├── pipelines/ # Kedro pipelines
-│ │ ├── data_ingestion/
-│ │ ├── data_preprocessing/
-│ │ ├── mask_merge/
-│ │ ├── data_split/
-│ │ └── training/
-│ └── ui/ # Flask UI
-│ ├── static/
-│ ├── templates/
-│ ├── init.py # create_app()
-│ ├── routes.py
-│ └── inference.py
-├── docker-compose.yml # Local multi-service runner
-├── pyproject.toml # Dependencies
-├── requirements.txt # Python deps
-└── README.md # You are here
-
-
 ## Running Kedro Pipelines Locally
 
 1. Install dependencies:
